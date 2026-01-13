@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Canvas Task Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Student Workspace</p>
+          <h1>Canvas Task Tracker</h1>
+          <p class="subtitle">
+            Organize your Canvas coursework, track due dates, and keep your study plan on
+            one page.
+          </p>
+        </div>
+        <div class="connection-card" aria-live="polite">
+          <div>
+            <p class="label">Canvas Connection</p>
+            <h2 id="connection-status">Not connected</h2>
+            <p class="hint">Link your school Canvas account to sync assignments.</p>
+          </div>
+          <button id="connect-btn" type="button">Connect Canvas</button>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel summary">
+          <h3>Weekly snapshot</h3>
+          <div class="stats">
+            <div>
+              <p class="stat-label">Due this week</p>
+              <p class="stat-value" id="stat-week">0</p>
+            </div>
+            <div>
+              <p class="stat-label">Overdue</p>
+              <p class="stat-value" id="stat-overdue">0</p>
+            </div>
+            <div>
+              <p class="stat-label">Completed</p>
+              <p class="stat-value" id="stat-completed">0</p>
+            </div>
+          </div>
+          <div class="quick-actions">
+            <button id="export-tasks" class="ghost" type="button">Export</button>
+            <label class="ghost file-input">
+              Import
+              <input id="import-tasks" type="file" accept="application/json" />
+            </label>
+          </div>
+          <div>
+            <p class="stat-label">Completion by class</p>
+            <div id="course-rings" class="course-rings"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <details id="task-details" open>
+            <summary>
+              <h3>Add a new task</h3>
+              <span class="summary-hint">Tap to collapse</span>
+            </summary>
+            <form id="task-form">
+              <div class="field">
+                <label for="task-title">Task title</label>
+                <input
+                  id="task-title"
+                  name="title"
+                  type="text"
+                  placeholder="Read Chapter 5"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="task-course">Course</label>
+                <input id="task-course" name="course" type="text" placeholder="BIO 101" required />
+              </div>
+              <div class="field">
+                <label for="task-type">Type</label>
+                <select id="task-type" name="type">
+                  <option value="Reading">Reading</option>
+                  <option value="Quiz">Quiz</option>
+                  <option value="Assignment" selected>Assignment</option>
+                  <option value="Discussion">Discussion</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="task-status">Status</label>
+                <select id="task-status" name="status">
+                  <option value="Not started" selected>Not started</option>
+                  <option value="In progress">In progress</option>
+                  <option value="Submitted">Submitted</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="task-due">Due date</label>
+                <input id="task-due" name="due" type="date" required />
+              </div>
+              <div class="field">
+                <label for="task-priority">Priority</label>
+                <select id="task-priority" name="priority">
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="task-reminder">Reminder</label>
+                <input id="task-reminder" name="reminder" type="datetime-local" />
+              </div>
+              <div class="field">
+                <label for="task-repeat">Repeat</label>
+                <select id="task-repeat" name="repeat">
+                  <option value="None" selected>None</option>
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label for="task-notes">Notes</label>
+                <textarea
+                  id="task-notes"
+                  name="notes"
+                  rows="3"
+                  placeholder="Lecture slides 12-18"
+                ></textarea>
+              </div>
+              <button type="submit" class="primary">Add task</button>
+            </form>
+          </details>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Your tasks</h3>
+              <p class="subtext">Tasks are saved locally to this device.</p>
+            </div>
+            <div class="filters">
+              <label class="chip">
+                <input type="checkbox" id="filter-high" />
+                High priority only
+              </label>
+              <label class="chip">
+                Course
+                <input id="filter-course" type="text" placeholder="BIO 101" />
+              </label>
+              <label class="chip">
+                Status
+                <select id="filter-status">
+                  <option value="All" selected>All</option>
+                  <option value="Not started">Not started</option>
+                  <option value="In progress">In progress</option>
+                  <option value="Submitted">Submitted</option>
+                </select>
+              </label>
+              <label class="chip">
+                Sort
+                <select id="sort-tasks">
+                  <option value="due" selected>Due date</option>
+                  <option value="course">Course</option>
+                  <option value="created">Recently added</option>
+                </select>
+              </label>
+              <button id="toggle-view" class="ghost" type="button">Calendar view</button>
+              <button id="clear-tasks" class="ghost" type="button">Clear all</button>
+            </div>
+          </div>
+          <ul id="task-list" class="task-list" aria-live="polite"></ul>
+          <div id="calendar-view" class="calendar" hidden></div>
+        </section>
+
+        <section class="panel">
+          <h3>Canvas sync checklist</h3>
+          <ol class="checklist">
+            <li>Connect your Canvas account to import upcoming assignments.</li>
+            <li>Review automatically created tasks for accuracy.</li>
+            <li>Set reminders or notes for study sessions.</li>
+            <li>Mark tasks complete once submitted in Canvas.</li>
+          </ol>
+          <div class="note">
+            <p>
+              This demo stores everything in your browser and simulates a Canvas connection.
+              When you are ready to connect the real Canvas API, replace the mock sync
+              request in <code>app.js</code> with your school OAuth settings.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
